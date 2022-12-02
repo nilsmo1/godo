@@ -19,17 +19,20 @@ type Item struct {
     Status      bool   `json:"status"`
 }
 
-func print_todos(scr *gc.Window, items Items, row int) Items {
+func print_item(scr *gc.Window, item Item, row int, idx int) {
     var done_char rune = ' '
-    scr.Printf("TODO LIST: %s\n", items.Title)
+    if row == idx { scr.AttrSet(gc.A_STANDOUT) }
+    if item.Status { done_char = 'x' }
+    scr.Printf("[%c] %d. Title: %s\n", done_char, idx+1, item.Title)
+    scr.AttrSet(gc.A_NORMAL)
+    scr.Printf("\tDescription:\n\t\t %s\n", item.Description)
+}
 
-    for idx, item := range items.Items {
-        if row == idx { scr.AttrSet(gc.A_STANDOUT) }
-        if item.Status { done_char = 'x' }
-        scr.Printf("[%c] %d. Title: %s\n", done_char, idx+1, item.Title)
-        scr.AttrSet(gc.A_NORMAL)
-        scr.Printf("\tDescription: %s\n", item.Description)
-    }
+func print_todos(scr *gc.Window, items Items) Items {
+    var row int = 0
+    scr.Clear()
+    scr.Printf("TODO LIST: %s\n", items.Title)
+    for idx, item := range items.Items { print_item(scr, item, row, idx) }
     for {
         k := gc.KeyString(scr.GetChar())
         if k == "q"             { break }
@@ -40,18 +43,36 @@ func print_todos(scr *gc.Window, items Items, row int) Items {
         }
         scr.Clear()
         scr.Printf("TODO LIST: %s\n", items.Title)
-        for idx, item := range items.Items {
-            done_char = ' '
-            if row == idx { scr.AttrSet(gc.A_STANDOUT) }
-            if item.Status { done_char = 'x' }
-            scr.Printf("[%c] %d. Title: %s\n",done_char, idx+1, item.Title)
-            scr.AttrSet(gc.A_NORMAL)
-            done_char = ' '
-            scr.Printf("\tDescription: %s\n", item.Description)
-        }
+        for idx, item := range items.Items { print_item(scr, item, row, idx) }
         scr.Refresh()
     }
     return items
+}
+
+func print_list(scr *gc.Window, list Items, row int, idx int) {
+    if row == idx { scr.AttrSet(gc.A_STANDOUT) }
+    scr.Printf("Title: %s\n", list.Title)
+    scr.AttrSet(gc.A_NORMAL)
+    
+}
+
+func get_list_idx(scr *gc.Window, lists Lists) int { 
+    var row int = 0
+    for idx, list := range lists.Lists { print_list(scr, list, row, idx) }
+    for {
+        k := gc.KeyString(scr.GetChar())
+        if k == "q"             { break }
+        if k == "s" || k == "B" { if row+1 < len(lists.Lists) { row++ } }
+        if k == "w" || k == "A" { if row   > 0 { row-- } }
+        if k == "enter" { 
+            return row
+        }
+        scr.Clear()
+        for idx, list := range lists.Lists { print_list(scr, list, row, idx) }
+        scr.Refresh()
+    }
+    
+    return -1
 }
 
 
@@ -70,11 +91,13 @@ func main() {
     gc.Echo(false)
     gc.Cursor(0)
 
-    var row int = 0
-    var choice int = 0
+    var list_idx int
+    list_idx = get_list_idx(scr, lists)
+    if list_idx == -1 { os.Exit(0) }
+
     var items Items
-    items = lists.Lists[choice]
-    lists.Lists[choice] = print_todos(scr, items, row)
+    items = lists.Lists[list_idx]
+    lists.Lists[list_idx] = print_todos(scr, items)
     b, _ := json.MarshalIndent(lists, "", "\t")
     os.WriteFile("test.json", b, 0644)
 
