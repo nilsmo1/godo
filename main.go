@@ -93,12 +93,11 @@ func main() {
 
     var list_idx int
     list_idx = get_list_idx(scr, lists)
-    if list_idx == -1 { os.Exit(0) }
+    if list_idx == -1 { gc.End(); os.Exit(0) }
 
     var items Items
     items = lists.Lists[list_idx]
     lists.Lists[list_idx] = print_todos(scr, items)
     b, _ := json.MarshalIndent(lists, "", "\t")
     os.WriteFile("test.json", b, 0644)
-
 }
