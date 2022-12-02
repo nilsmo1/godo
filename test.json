@@ -1,15 +1,34 @@
 {
-	"title": "some todo-list",
-	"items": [
+	"lists": [
 		{
-			"title": "do something",
-			"description": "desc",
-			"status": true
+			"title": "some todo-list",
+			"items": [
+				{
+					"title": "do something",
+					"description": "desc",
+					"status": true
+				},
+				{
+					"title": "do something else",
+					"description": "desc",
+					"status": true
+				}
+			]
 		},
 		{
-			"title": "do something else",
-			"description": "desc",
-			"status": true
+			"title": "some todo-list",
+			"items": [
+				{
+					"title": "do something",
+					"description": "desc",
+					"status": true
+				},
+				{
+					"title": "do something else",
+					"description": "desc",
+					"status": true
+				}
+			]
 		}
 	]
 }

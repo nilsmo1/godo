@@ -4,6 +4,10 @@ import "encoding/json"
 import "os"
 import gc "github.com/gbin/goncurses"
 
+type Lists struct {
+    Lists []Items `json:"lists"`
+}
+
 type Items struct {
     Title   string `json:"title"`
     Items []Item   `json:"items"`
@@ -54,9 +58,9 @@ func print_todos(scr *gc.Window, items Items, row int) Items {
 func main() {
     json_content, read_err := os.ReadFile("test.json")
     if read_err != nil { fmt.Println(read_err); return }
-
-    var items Items
-    unmarshal_err := json.Unmarshal(json_content, &items)
+    
+    var lists Lists
+    unmarshal_err := json.Unmarshal(json_content, &lists)
     if unmarshal_err != nil { fmt.Println(unmarshal_err); return }
 
     scr, init_err := gc.Init();
@@ -67,9 +71,11 @@ func main() {
     gc.Cursor(0)
 
     var row int = 0
-    items = print_todos(scr, items, row)
-    
-    b, _ := json.MarshalIndent(items, "", "\t")
+    var choice int = 0
+    var items Items
+    items = lists.Lists[choice]
+    lists.Lists[choice] = print_todos(scr, items, row)
+    b, _ := json.MarshalIndent(lists, "", "\t")
     os.WriteFile("test.json", b, 0644)
 
 }
