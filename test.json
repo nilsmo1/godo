@@ -1,7 +1,17 @@
 {
 	"lists": [
 		{
-			"title": "New todo-list",
+			"title": "something",
+			"items": [
+				{
+					"title": "New task",
+					"description": "new task description",
+					"status": false
+				}
+			]
+		},
+		{
+			"title": "some new todo",
 			"items": [
 				{
 					"title": "New task",

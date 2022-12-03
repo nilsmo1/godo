@@ -2,7 +2,11 @@ package main
 import "fmt"
 import "encoding/json"
 import "os"
+import "strings"
 import gc "github.com/gbin/goncurses"
+
+var CHARS string = `: abcdefghijklmnopqrstuvwxyz
+ABCDEFGHIJKLMNOPQRSTUVWXYZ`
 
 type Lists struct { Lists []Items `json:"lists"` }
 
@@ -15,6 +19,38 @@ type Item struct {
     Task        string `json:"title"`
     Description string `json:"description"`
     Status      bool   `json:"status"`
+}
+
+func get_input(scr *gc.Window) string {
+    var wh, ww, nwh, nww, posy, posx int
+    wh, ww = scr.MaxYX()
+    nwh, nww   = 5, ww/2
+    posy, posx = (wh-nwh)/2, (ww-nww)/2 
+
+    input_window, window_err := gc.NewWindow(nwh, nww, posy, posx)
+    if window_err != nil { gc.End(); fmt.Println(window_err) }
+    defer gc.End()
+    var k, buffer string
+    buffer = ""
+    for {
+        input_window.Clear()
+        input_window.Box(gc.ACS_VLINE, gc.ACS_HLINE)
+        input_window.Println(" Title:")
+        input_window.Printf(" %s", buffer)
+
+        kk := input_window.GetChar()
+        k = gc.KeyString(kk)
+        if k  == "enter" { break }
+        if kk == 127 { 
+            if c := len(buffer); c != 0 {
+                buffer = buffer[:c-1]
+                continue
+            } else { return "" }
+        }
+        if strings.Contains(CHARS, k) { buffer+=k }
+    }
+    gc.End()
+    return buffer
 }
 
 func print_item(scr *gc.Window, item Item, row int, idx int) {
@@ -80,8 +116,10 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
             (*lists).Lists = append(lists.Lists[:row], lists.Lists[row+1:]...)
             if row >= len(lists.Lists) { row = len(lists.Lists)-1 }
         case "n": 
+            title := get_input(scr)
+            if title == "" { break }
             item  := Item  { "New task", "new task description", false }
-            items := Items { "New todo-list", []Item{item} }
+            items := Items { title, []Item{item} }
             (*lists).Lists = append(lists.Lists, items)
             if row < 0 { row = 0 }
         }
