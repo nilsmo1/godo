@@ -14,7 +14,7 @@ type Items struct {
 }
 
 type Item struct {
-    Title       string `json:"title"`
+    Task        string `json:"title"`
     Description string `json:"description"`
     Status      bool   `json:"status"`
 }
@@ -23,12 +23,12 @@ func print_item(scr *gc.Window, item Item, row int, idx int) {
     var done_char rune = ' '
     if row == idx { scr.AttrSet(gc.A_STANDOUT) }
     if item.Status { done_char = 'x' }
-    scr.Printf("[%c] %d. Title: %s\n", done_char, idx+1, item.Title)
+    scr.Printf("[%c] %d. Task: %s\n", done_char, idx+1, item.Task)
     scr.AttrSet(gc.A_NORMAL)
     scr.Printf("\tDescription:\n\t\t %s\n", item.Description)
 }
 
-func print_todos(scr *gc.Window, items Items) Items {
+func print_todos(scr *gc.Window, items *Items) /*Items*/ {
     var row int = 0
     scr.Clear()
     scr.Printf("TODO LIST: %s\n", items.Title)
@@ -39,14 +39,14 @@ func print_todos(scr *gc.Window, items Items) Items {
         if k == "s" || k == "B" { if row+1 < len(items.Items) { row++ } }
         if k == "w" || k == "A" { if row   > 0 { row-- } }
         if k == "enter" { 
-            items.Items[row].Status = !items.Items[row].Status
+            (*items).Items[row].Status = !items.Items[row].Status
         }
         scr.Clear()
         scr.Printf("TODO LIST: %s\n", items.Title)
         for idx, item := range items.Items { print_item(scr, item, row, idx) }
         scr.Refresh()
     }
-    return items
+    //return items
 }
 
 func print_list(scr *gc.Window, list Items, row int, idx int) {
@@ -56,22 +56,31 @@ func print_list(scr *gc.Window, list Items, row int, idx int) {
     
 }
 
-func get_list_idx(scr *gc.Window, lists Lists) int { 
+func get_list_idx(scr *gc.Window, lists *Lists) int { 
     var row int = 0
     for idx, list := range lists.Lists { print_list(scr, list, row, idx) }
+    var k string
+    var ret bool
     for {
-        k := gc.KeyString(scr.GetChar())
-        if k == "q"             { break }
-        if k == "s" || k == "B" { if row+1 < len(lists.Lists) { row++ } }
-        if k == "w" || k == "A" { if row   > 0 { row-- } }
-        if k == "enter" { 
-            return row
+        k = gc.KeyString(scr.GetChar())
+        switch k { 
+        case "q": ret = true
+        case "s", "B": if row+1 < len(lists.Lists) { row++ } 
+        case "w", "A": if row   > 0                { row-- } 
+        case "enter": return row 
+        case "d": 
+            if len(lists.Lists) == 0 { break }
+            (*lists).Lists = append(lists.Lists[:row], lists.Lists[row+1:]...)
+        case "n": 
+            item  := Item  { "New task", "new task description", false }
+            items := Items { "New todo-list", []Item{item} }
+            (*lists).Lists = append(lists.Lists, items)
         }
+        if ret { break }
         scr.Clear()
         for idx, list := range lists.Lists { print_list(scr, list, row, idx) }
         scr.Refresh()
     }
-    
     return -1
 }
 
@@ -92,12 +101,16 @@ func main() {
     gc.Cursor(0)
 
     var list_idx int
-    list_idx = get_list_idx(scr, lists)
-    if list_idx == -1 { gc.End(); os.Exit(0) }
-
     var items Items
-    items = lists.Lists[list_idx]
-    lists.Lists[list_idx] = print_todos(scr, items)
+    for {
+        scr.Clear()
+        list_idx = get_list_idx(scr, &lists)
+        if list_idx == -1 { break }
+
+        items = lists.Lists[list_idx]
+        //lists.Lists[list_idx] = print_todos(scr, items)
+        print_todos(scr, &items)
+    }
     b, _ := json.MarshalIndent(lists, "", "\t")
     os.WriteFile("test.json", b, 0644)
 }

@@ -1,34 +1,3 @@
 {
-	"lists": [
-		{
-			"title": "some todo-list",
-			"items": [
-				{
-					"title": "do something",
-					"description": "desc",
-					"status": true
-				},
-				{
-					"title": "do something else",
-					"description": "desc",
-					"status": false
-				}
-			]
-		},
-		{
-			"title": "l2",
-			"items": [
-				{
-					"title": "do di di",
-					"description": "desc",
-					"status": false
-				},
-				{
-					"title": "do dod do",
-					"description": "desc",
-					"status": false
-				}
-			]
-		}
-	]
+	"lists": []
 }
