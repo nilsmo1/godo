@@ -1,3 +1,14 @@
 {
-	"lists": []
+	"lists": [
+		{
+			"title": "New todo-list",
+			"items": [
+				{
+					"title": "New task",
+					"description": "new task description",
+					"status": false
+				}
+			]
+		}
+	]
 }

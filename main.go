@@ -4,9 +4,7 @@ import "encoding/json"
 import "os"
 import gc "github.com/gbin/goncurses"
 
-type Lists struct {
-    Lists []Items `json:"lists"`
-}
+type Lists struct { Lists []Items `json:"lists"` }
 
 type Items struct {
     Title   string `json:"title"`
@@ -28,25 +26,32 @@ func print_item(scr *gc.Window, item Item, row int, idx int) {
     scr.Printf("\tDescription:\n\t\t %s\n", item.Description)
 }
 
-func print_todos(scr *gc.Window, items *Items) /*Items*/ {
+func print_todos(scr *gc.Window, items *Items) {
     var row int = 0
     scr.Clear()
     scr.Printf("TODO LIST: %s\n", items.Title)
-    for idx, item := range items.Items { print_item(scr, item, row, idx) }
+    var k string
     for {
-        k := gc.KeyString(scr.GetChar())
-        if k == "q"             { break }
-        if k == "s" || k == "B" { if row+1 < len(items.Items) { row++ } }
-        if k == "w" || k == "A" { if row   > 0 { row-- } }
-        if k == "enter" { 
-            (*items).Items[row].Status = !items.Items[row].Status
-        }
         scr.Clear()
         scr.Printf("TODO LIST: %s\n", items.Title)
         for idx, item := range items.Items { print_item(scr, item, row, idx) }
         scr.Refresh()
+        k = gc.KeyString(scr.GetChar())
+        switch k {
+        case "q": return
+        case "s", "B": if row+1 < len(items.Items) { row++ }
+        case "w", "A": if row   > 0                { row-- }
+        case "enter": (*items).Items[row].Status = !items.Items[row].Status
+        case "d": 
+            if len(items.Items) == 0 { break }
+            (*items).Items = append(items.Items[:row], items.Items[row+1:]...)
+            if row >= len(items.Items) { row = len(items.Items)-1 }
+        case "n": 
+            item := Item { "New task", "new task description", false }
+            (*items).Items = append(items.Items, item)
+            if row < 0 { row = 0 }
+        }
     }
-    //return items
 }
 
 func print_list(scr *gc.Window, list Items, row int, idx int) {
@@ -58,10 +63,12 @@ func print_list(scr *gc.Window, list Items, row int, idx int) {
 
 func get_list_idx(scr *gc.Window, lists *Lists) int { 
     var row int = 0
-    for idx, list := range lists.Lists { print_list(scr, list, row, idx) }
     var k string
     var ret bool
     for {
+        scr.Clear()
+        for idx, list := range lists.Lists { print_list(scr, list, row, idx) }
+        scr.Refresh()
         k = gc.KeyString(scr.GetChar())
         switch k { 
         case "q": ret = true
@@ -71,15 +78,14 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
         case "d": 
             if len(lists.Lists) == 0 { break }
             (*lists).Lists = append(lists.Lists[:row], lists.Lists[row+1:]...)
+            if row >= len(lists.Lists) { row = len(lists.Lists)-1 }
         case "n": 
             item  := Item  { "New task", "new task description", false }
             items := Items { "New todo-list", []Item{item} }
             (*lists).Lists = append(lists.Lists, items)
+            if row < 0 { row = 0 }
         }
         if ret { break }
-        scr.Clear()
-        for idx, list := range lists.Lists { print_list(scr, list, row, idx) }
-        scr.Refresh()
     }
     return -1
 }
@@ -108,8 +114,8 @@ func main() {
         if list_idx == -1 { break }
 
         items = lists.Lists[list_idx]
-        //lists.Lists[list_idx] = print_todos(scr, items)
         print_todos(scr, &items)
+        lists.Lists[list_idx] = items
     }
     b, _ := json.MarshalIndent(lists, "", "\t")
     os.WriteFile("test.json", b, 0644)
