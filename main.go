@@ -90,6 +90,7 @@ func print_item(scr *gc.Window, item Item, row int, idx int) {
 }
 
 func print_todos(scr *gc.Window, items *Items) {
+    // TODO: scroll on too many todos
     var row int = 0
     scr.Clear()
     print_title(scr, items.Title)
@@ -133,6 +134,7 @@ func print_list(scr *gc.Window, list Items, row int, idx int) {
 }
 
 func get_list_idx(scr *gc.Window, lists *Lists) int { 
+    // TODO: scroll on too many lists
     var row int = 0
     var k string
     var ret bool
