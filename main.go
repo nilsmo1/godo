@@ -24,13 +24,14 @@ type Item struct {
 func get_input(scr *gc.Window, title string) string {
     var wh, ww, nwh, nww, posy, posx int
     wh, ww = scr.MaxYX()
-    nwh, nww   = 4, ww/2
+    nwh, nww   = 4, ww/4
     posy, posx = (wh-nwh)/2, (ww-nww)/2 
 
     input_window, window_err := gc.NewWindow(nwh, nww, posy, posx)
     if window_err != nil { gc.End(); fmt.Println(window_err) }
     defer gc.End()
     var k, buffer string
+    var diff int
     buffer = ""
     for {
         input_window.Clear()
@@ -39,7 +40,14 @@ func get_input(scr *gc.Window, title string) string {
         input_window.AttrSet(gc.A_BOLD)
         input_window.Printf("  %s:\n", title)
         input_window.AttrSet(gc.A_NORMAL)
-        input_window.Printf("  %s\n", buffer)
+        diff = len(buffer) + 5 - nww
+        if diff > 0 {
+            input_window.Printf("  ..%s", buffer[diff+2:])
+        } else { input_window.Printf("  %s", buffer) }
+
+        input_window.AttrSet(gc.A_UNDERLINE | gc.A_BLINK)
+        input_window.Println(" ")
+        input_window.AttrSet(gc.A_NORMAL)
 
         input_window.Box(gc.ACS_VLINE, gc.ACS_HLINE)
 
@@ -107,7 +115,7 @@ func print_todos(scr *gc.Window, items *Items) {
         case "e":
             task_edit := get_input(scr, "Task")
             description_edit := get_input(scr, "Description")
-            (*items).Items[row].Task = task_edit
+            if task_edit != "" { (*items).Items[row].Task = task_edit }
             (*items).Items[row].Description = description_edit
         }
     }

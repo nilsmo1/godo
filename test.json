@@ -9,21 +9,6 @@
 					"status": false
 				}
 			]
-		},
-		{
-			"title": "testest",
-			"items": [
-				{
-					"title": "Edit number II",
-					"description": "something",
-					"status": false
-				},
-				{
-					"title": "Some other task name",
-					"description": "",
-					"status": false
-				}
-			]
 		}
 	]
 }
