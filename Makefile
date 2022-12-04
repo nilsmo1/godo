@@ -12,6 +12,7 @@ install: build
 	sudo cp $(BINARY) /usr/bin/
 	cp template.json ~/.config/godo-lists.json
 	go clean
+	rm -f $(BINARY)
 
 clean:
 	go clean
