@@ -11,6 +11,7 @@ Run the following code to create an executable and a file which stores your todo
 $ git@github.com:nilsmo1/godo.git
 $ cd godo/
 $ make install
+$ godo-bin
 ```
 Since the executable is copied to `/usr/bin/` you will have to authenticate.
 
