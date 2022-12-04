@@ -5,8 +5,9 @@ import "os"
 import "strings"
 import gc "github.com/gbin/goncurses"
 
-var CHARS string = `: abcdefghijklmnopqrstuvwxyz
-ABCDEFGHIJKLMNOPQRSTUVWXYZ`
+var CHARS string = ` abcdefghijklmnopqrstuvwxyz
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+/%@,+<!|{:(-$>#'}=^"&*\;._?)`
 
 type Lists struct { Lists []Items `json:"lists"` }
 
@@ -152,6 +153,9 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
             items := Items { title, []Item{item} }
             (*lists).Lists = append(lists.Lists, items)
             if row < 0 { row = 0 }
+        case "e":
+            list_edit := get_input(scr, "List")
+            if list_edit != "" { (*lists).Lists[row].Title = list_edit }
         }
         if ret { break }
     }
