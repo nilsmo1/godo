@@ -10,7 +10,7 @@ br: build run
 install: build
 	chmod +x $(BINARY)
 	sudo cp $(BINARY) /usr/bin/
-	cp template.json ~/.config/godo-lists.json
+	test -f ~/.config/godo-lists.json || cp template.json ~/.config/godo-lists.json
 	go clean
 	rm -f $(BINARY)
 
