@@ -6,4 +6,4 @@ run:
 br: build run 
 clean:
 	go clean
-	rm $(BINARY)
+	rm -f $(BINARY)
