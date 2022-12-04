@@ -21,10 +21,10 @@ type Item struct {
     Status      bool   `json:"status"`
 }
 
-func get_input(scr *gc.Window) string {
+func get_input(scr *gc.Window, title string) string {
     var wh, ww, nwh, nww, posy, posx int
     wh, ww = scr.MaxYX()
-    nwh, nww   = 5, ww/2
+    nwh, nww   = 4, ww/2
     posy, posx = (wh-nwh)/2, (ww-nww)/2 
 
     input_window, window_err := gc.NewWindow(nwh, nww, posy, posx)
@@ -34,9 +34,14 @@ func get_input(scr *gc.Window) string {
     buffer = ""
     for {
         input_window.Clear()
+        input_window.Println()
+
+        input_window.AttrSet(gc.A_BOLD)
+        input_window.Printf("  %s:\n", title)
+        input_window.AttrSet(gc.A_NORMAL)
+        input_window.Printf("  %s\n", buffer)
+
         input_window.Box(gc.ACS_VLINE, gc.ACS_HLINE)
-        input_window.Println(" Title:")
-        input_window.Printf(" %s", buffer)
 
         kk := input_window.GetChar()
         k = gc.KeyString(kk)
@@ -53,23 +58,36 @@ func get_input(scr *gc.Window) string {
     return buffer
 }
 
+func print_title(scr *gc.Window, title string) {
+    scr.AttrSet(gc.A_BOLD)
+    scr.Printf("TODO-LIST: %s\n", title)
+    scr.AttrSet(gc.A_NORMAL)
+}
+
 func print_item(scr *gc.Window, item Item, row int, idx int) {
     var done_char rune = ' '
     if row == idx { scr.AttrSet(gc.A_STANDOUT) }
     if item.Status { done_char = 'x' }
     scr.Printf("[%c] %d. Task: %s\n", done_char, idx+1, item.Task)
     scr.AttrSet(gc.A_NORMAL)
-    scr.Printf("\tDescription:\n\t\t %s\n", item.Description)
+    if item.Description != "" {
+        scr.AttrSet(gc.A_BOLD)
+        scr.Print("  Description:\n")
+        scr.AttrSet(gc.A_NORMAL)
+        scr.Printf("    %s\n", item.Description)
+    }
 }
+
+
 
 func print_todos(scr *gc.Window, items *Items) {
     var row int = 0
     scr.Clear()
-    scr.Printf("TODO LIST: %s\n", items.Title)
+    print_title(scr, items.Title)
     var k string
     for {
         scr.Clear()
-        scr.Printf("TODO LIST: %s\n", items.Title)
+        print_title(scr, items.Title)
         for idx, item := range items.Items { print_item(scr, item, row, idx) }
         scr.Refresh()
         k = gc.KeyString(scr.GetChar())
@@ -86,6 +104,11 @@ func print_todos(scr *gc.Window, items *Items) {
             item := Item { "New task", "new task description", false }
             (*items).Items = append(items.Items, item)
             if row < 0 { row = 0 }
+        case "e":
+            task_edit := get_input(scr, "Task")
+            description_edit := get_input(scr, "Description")
+            (*items).Items[row].Task = task_edit
+            (*items).Items[row].Description = description_edit
         }
     }
 }
@@ -94,7 +117,6 @@ func print_list(scr *gc.Window, list Items, row int, idx int) {
     if row == idx { scr.AttrSet(gc.A_STANDOUT) }
     scr.Printf("Title: %s\n", list.Title)
     scr.AttrSet(gc.A_NORMAL)
-    
 }
 
 func get_list_idx(scr *gc.Window, lists *Lists) int { 
@@ -116,7 +138,7 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
             (*lists).Lists = append(lists.Lists[:row], lists.Lists[row+1:]...)
             if row >= len(lists.Lists) { row = len(lists.Lists)-1 }
         case "n": 
-            title := get_input(scr)
+            title := get_input(scr, "Title")
             if title == "" { break }
             item  := Item  { "New task", "new task description", false }
             items := Items { title, []Item{item} }

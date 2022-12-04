@@ -1,7 +1,7 @@
 {
 	"lists": [
 		{
-			"title": "something",
+			"title": "Something",
 			"items": [
 				{
 					"title": "New task",
@@ -11,12 +11,17 @@
 			]
 		},
 		{
-			"title": "some new todo",
+			"title": "testest",
 			"items": [
 				{
-					"title": "New task",
-					"description": "new task description",
-					"status": false
+					"title": "Edit",
+					"description": "",
+					"status": true
+				},
+				{
+					"title": "Some other task name",
+					"description": "",
+					"status": true
 				}
 			]
 		}
