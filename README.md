@@ -8,8 +8,8 @@ For the moment, this application is only suited for use on linux. Make sure you 
 ## Installation
 Run the following code to create an executable and a file which stores your todo-lists.
 ```console
-$ git@github.com:nilsmo1/todo-app.git
-$ cd todo-app/
+$ git@github.com:nilsmo1/godo.git
+$ cd godo/
 $ make install
 ```
 Since the executable is copied to `/usr/bin/` you will have to authenticate.

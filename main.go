@@ -111,11 +111,15 @@ func print_todos(scr *gc.Window, items *Items) {
             (*items).Items = append(items.Items[:row], items.Items[row+1:]...)
             if row >= len(items.Items) { row = len(items.Items)-1 }
         case "n": 
-            item := Item { "New task", "new task description", false }
+            task_new := get_input(scr, "Task")
+            if task_new == "" { break }
+            desc_new := get_input(scr, "Description")
+            item := Item { task_new, desc_new, false }
             (*items).Items = append(items.Items, item)
             if row < 0 { row = 0 }
         case "e":
             task_edit := get_input(scr, "Task")
+            if task_edit == "" { break }
             description_edit := get_input(scr, "Description")
             if task_edit != "" { (*items).Items[row].Task = task_edit }
             (*items).Items[row].Description = description_edit
@@ -150,7 +154,10 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
         case "n": 
             title := get_input(scr, "Title")
             if title == "" { break }
-            item  := Item  { "New task", "new task description", false }
+            task_new := get_input(scr, "Task")
+            desc_new := get_input(scr, "Description")
+            if task_new == "" { task_new = "New task"}
+            item  := Item  { task_new, desc_new, false }
             items := Items { title, []Item{item} }
             (*lists).Lists = append(lists.Lists, items)
             if row < 0 { row = 0 }
@@ -165,7 +172,10 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
 
 
 func main() {
-    json_content, read_err := os.ReadFile("test.json")
+    home, home_err := os.UserHomeDir()
+    if home_err != nil { fmt.Println(home_err); return }
+    path := home + "/.config/godo-lists.json"
+    json_content, read_err := os.ReadFile(path)
     if read_err != nil { fmt.Println(read_err); return }
     
     var lists Lists
@@ -191,5 +201,5 @@ func main() {
         lists.Lists[list_idx] = items
     }
     b, _ := json.MarshalIndent(lists, "", "\t")
-    os.WriteFile("test.json", b, 0644)
+    os.WriteFile(path, b, 0644)
 }

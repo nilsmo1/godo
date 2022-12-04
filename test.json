@@ -1,24 +1,3 @@
 {
-	"lists": [
-		{
-			"title": "something else",
-			"items": [
-				{
-					"title": "New task",
-					"description": "new task description",
-					"status": false
-				}
-			]
-		},
-		{
-			"title": "\\mathscr{}$$@@!!?",
-			"items": [
-				{
-					"title": "New task",
-					"description": "new task description",
-					"status": false
-				}
-			]
-		}
-	]
+	"lists": []
 }
