@@ -55,11 +55,12 @@ func get_input(scr *gc.Window, title string) string {
         kk := input_window.GetChar()
         k = gc.KeyString(kk)
         if k  == "enter" { break }
-        if kk == 127 { 
+        if kk == 27 { return "" }
+        if kk == 127 {
             if c := len(buffer); c != 0 {
                 buffer = buffer[:c-1]
                 continue
-            } else { return "" }
+            } 
         }
         if strings.Contains(CHARS, k) { buffer+=k }
     }
