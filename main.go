@@ -7,7 +7,8 @@ import gc "github.com/gbin/goncurses"
 
 var CHARS string = ` abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
-/%@,+<!|{:(-$>#'}=^"&*\;._?)`
+/%@,+<!|{:(-$>#'}=^"&*\;._?)
+0123456789`
 
 type Lists struct { Lists []Items `json:"lists"` }
 
@@ -88,8 +89,6 @@ func print_item(scr *gc.Window, item Item, row int, idx int) {
     }
 }
 
-
-
 func print_todos(scr *gc.Window, items *Items) {
     var row int = 0
     scr.Clear()
@@ -169,7 +168,6 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
     }
     return -1
 }
-
 
 func main() {
     home, home_err := os.UserHomeDir()
