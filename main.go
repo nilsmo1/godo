@@ -71,7 +71,7 @@ func get_input(scr *gc.Window, title string) string {
 
 func print_title(scr *gc.Window, title string) {
     scr.AttrSet(gc.A_BOLD)
-    scr.Printf("TODO-LIST: %s\n", title)
+    scr.Printf("%s\n", title)
     scr.AttrSet(gc.A_NORMAL)
 }
 
@@ -87,6 +87,55 @@ func print_item(scr *gc.Window, item Item, row int, idx int) {
         scr.AttrSet(gc.A_NORMAL)
         scr.Printf("    %s\n", item.Description)
     }
+}
+
+func confirm(scr *gc.Window, title string, name string) bool {
+    var wh, ww, nwh, nww, posy, posx int
+    wh, ww = scr.MaxYX()
+    nwh, nww   = 6, ww/2
+    posy, posx = (wh-nwh)/2, (ww-nww)/2 
+
+    input_window, window_err := gc.NewWindow(nwh, nww, posy, posx)
+    if window_err != nil { gc.End(); fmt.Println(window_err) }
+    defer gc.End()
+    var k, buffer string
+    var diff int
+    buffer = ""
+    done := false
+    for {
+	if done { break }
+        input_window.Clear()
+        input_window.Println()
+
+        input_window.AttrSet(gc.A_BOLD)
+        input_window.Printf("  %s:\n", fmt.Sprintf("Do you want to delete this %s? [y/N]", title))
+        input_window.AttrSet(gc.A_NORMAL)
+	input_window.Printf("  \"%s\"\n", name)
+        diff = len(buffer) + 5 - nww
+        if diff > 0 {
+            input_window.Printf("  ..%s", buffer[diff+2:])
+        } else { input_window.Printf("  %s", buffer) }
+
+        input_window.AttrSet(gc.A_UNDERLINE | gc.A_BLINK)
+        input_window.Println(" ")
+        input_window.AttrSet(gc.A_NORMAL)
+
+        input_window.Box(gc.ACS_VLINE, gc.ACS_HLINE)
+
+        kk := input_window.GetChar()
+        k = gc.KeyString(kk)
+        if k  == "enter" { done = true }
+        if kk == 127 {
+            if c := len(buffer); c != 0 {
+                buffer = buffer[:c-1]
+                continue
+            } 
+	}
+        if strings.Contains(CHARS, k) { buffer+=k }
+    }
+    gc.End()
+    if buffer == "y" || buffer == "Y" { return true }
+    return false
 }
 
 func print_todos(scr *gc.Window, items *Items) {
@@ -108,6 +157,7 @@ func print_todos(scr *gc.Window, items *Items) {
         case "enter": (*items).Items[row].Status = !items.Items[row].Status
         case "d": 
             if len(items.Items) == 0 { break }
+	    if !confirm(scr, "task", items.Items[row].Task) { break }
             (*items).Items = append(items.Items[:row], items.Items[row+1:]...)
             if row >= len(items.Items) { row = len(items.Items)-1 }
         case "n": 
@@ -150,6 +200,7 @@ func get_list_idx(scr *gc.Window, lists *Lists) int {
         case "enter": return row 
         case "d": 
             if len(lists.Lists) == 0 { break }
+	    if !confirm(scr, "list", lists.Lists[row].Title) { break }
             (*lists).Lists = append(lists.Lists[:row], lists.Lists[row+1:]...)
             if row >= len(lists.Lists) { row = len(lists.Lists)-1 }
         case "n": 
